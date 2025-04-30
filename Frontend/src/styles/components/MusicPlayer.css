@@ -1,0 +1,32 @@
+.music-player {
+   position: fixed;
+   bottom: 0;
+   width: 100%;
+   background: #181818;
+   padding: 1rem;
+   border-top: 1px solid #282828;
+ }
+ 
+ .player-controls {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 1rem;
+ }
+ 
+ .control-button {
+   background: none;
+   border: none;
+   color: #b3b3b3;
+   font-size: 1.5rem;
+   cursor: pointer;
+   padding: 0.5rem;
+ }
+ 
+ .control-button:hover {
+   color: white;
+ }
+ 
+ .control-button.play {
+   font-size: 2rem;
+ }
