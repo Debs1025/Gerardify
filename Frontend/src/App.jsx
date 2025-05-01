@@ -7,22 +7,24 @@ import Home from './pages/Home'
 import Search from './pages/Search'
 import Library from './pages/Library'
 import MusicPlayer from './components/MusicPlayer'
+import Album from './pages/Album'
 
 function App() {
   return (
     <div className="app-container">
       <BrowserRouter>
         <div className="main-content">
-          <Navbar />
+          <Navbar/>
           <div className="content-area">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
               <Route path="/library" element={<Library />} />
+              <Route path="/album/:id" element={<Album />} />
             </Routes>
           </div>
         </div>
-        <MusicPlayer />
+        <MusicPlayer/>
       </BrowserRouter>
     </div>
   )
