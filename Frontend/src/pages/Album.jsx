@@ -9,8 +9,6 @@ function Album() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [editedArtist, setEditedArtist] = useState('');
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   //Sample data lang ni since mayo pa kong backend 
   //Riribayan ko ang pag fetch nya since pag inoopen si album dae nareflect si name and artist
@@ -21,16 +19,18 @@ function Album() {
     name: "My Playlist",
     artist: "Your Playlist",
     year: new Date().getFullYear(),
-    songs: [
-      {
-        id: 1,
-        title: "Sailor Song",
-        artist: "Gigi Perez",
-        duration: "3:29",
-        url: "./src/songs/sailor.mp3" 
-      }
-    ]
+    songs: []
   };
+
+  const songs = [
+    {
+      id: 1,
+      title: "Sailor Song",
+      artist: "Gigi Perez",
+      duration: "3:29",
+      url: "./src/songs/sailor.mp3" 
+    }
+  ];
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -58,7 +58,7 @@ function Album() {
     setCurrentSong(song);
     setIsPlaying(true);
   };
-
+  
   return (
     <div className="album-view">
       <div className="album-header">
@@ -131,27 +131,30 @@ function Album() {
         </div>
       )}
 
-    <div className="album-content">
-        {album.songs.length === 0 ? (
-          <p className="empty-message">This playlist is empty</p>
-        ) : (
-          <div className="songs-list">
-            {album.songs.map((song, index) => (
-              <div 
-                key={song.id} 
-                className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
-                onClick={() => handleSongClick(song)}
-              >
-                <span className="song-number">{index + 1}</span>
-                <div className="song-info">
-                  <span className="song-title">{song.title}</span>
-                  <span className="song-artist">{song.artist}</span>
+    <div className="songs-section">
+        <h2>Songs</h2>
+        <div className="songs-content">
+          {songs.length === 0 ? (
+            <p className="empty-message">No songs available</p>
+          ) : (
+            <div className="songs-list">
+              {songs.map((song, index) => (
+                <div 
+                  key={song.id} 
+                  className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
+                  onClick={() => handleSongClick(song)}
+                >
+                  <span className="song-number">{index + 1}</span>
+                  <div className="song-info">
+                    <span className="song-title">{song.title}</span>
+                    <span className="song-artist">{song.artist}</span>
+                  </div>
+                  <span className="song-duration">{song.duration}</span>
                 </div>
-                <span className="song-duration">{song.duration}</span>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

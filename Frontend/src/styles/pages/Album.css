@@ -217,3 +217,18 @@
   color: white;
   border-color: white;
 }
+
+/* Song Style */
+.songs-section {
+  margin-top: 48px;
+}
+
+.songs-section h2 {
+  color: rgb(0, 0, 0);
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.songs-content {
+  margin-top: 16px;
+}

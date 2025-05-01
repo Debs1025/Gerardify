@@ -10,6 +10,9 @@ import MusicPlayer from './components/MusicPlayer'
 import Album from './pages/Album'
 
 function App() {
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
   return (
     <div className="app-container">
       <BrowserRouter>
@@ -19,15 +22,26 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/album/:id" element={<Album />} />
+              <Route path="/library" element={<Library setCurrentSong={setCurrentSong} />} 
+              />
+              <Route path="/album/:id" element={
+                <Album 
+                  setCurrentSong={setCurrentSong} 
+                  currentSong={currentSong}
+                  setIsPlaying={setIsPlaying}
+                />
+              } />
             </Routes>
           </div>
         </div>
-        <MusicPlayer/>
+        <MusicPlayer 
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+        />
       </BrowserRouter>
     </div>
-  )
+  );
 }
 
 export default App
