@@ -2,13 +2,20 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/pages/Library.css';
 
-function Library({ setCurrentSong }) { 
+function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, setIsPlaying }) {  
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showSongForm, setShowSongForm] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [songs, setSongs] = useState([]);
+  const [newSongData, setNewSongData] = useState({
+    title: '',
+    artist: '',
+    file: null,
+    tempUrl: ''
+  });
 
-  const handleCreatePlaylist = (e) => {
+  const handleCreatePlaylist = (e) => { 
     e.preventDefault();
     if (newPlaylistName.trim()) {
       setPlaylists([...playlists, { 
@@ -23,103 +30,102 @@ function Library({ setCurrentSong }) {
     }
   };
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setNewSongData({
+        ...newSongData,
+        file: file,
+        tempUrl: url,
+        title: file.name.replace(/\.[^/.]+$/, "")
+      });
+      setShowSongForm(true);
+    }
+  };
+
+  const handleSongFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!newSongData.file || !newSongData.title.trim() || !newSongData.artist.trim()) return;
+
+    const audio = new Audio(newSongData.tempUrl);
+    
+    await new Promise((resolve) => {
+      audio.addEventListener('loadedmetadata', () => {
+        const duration = Math.floor(audio.duration);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        const newSong = {
+          id: Date.now() + Math.random(),
+          title: newSongData.title,
+          artist: newSongData.artist,
+          duration: formattedDuration,
+          url: newSongData.tempUrl
+        };
+
+        setSongs(prevSongs => {
+          const updatedSongs = [...prevSongs, newSong];
+          setCurrentPlaylist(updatedSongs);
+          return updatedSongs;
+        });
+
+        resolve();
+      });
+    });
+
+    // Reset form
+    setNewSongData({
+      title: '',
+      artist: '',
+      file: null,
+      tempUrl: ''
+    });
+    setShowSongForm(false);
+  };
+
   const handlePlaylistClick = (playlist) => {
     navigate(`/album/${playlist.id}`);
   };
 
   const handleSongClick = (song) => {
-    console.log('Song clicked:', song);
+    navigate('/song', { state: { song } });
+  };
+
+  const handlePlayClick = (e, song) => {
+    e.stopPropagation(); 
     setCurrentSong({
+      id: song.id,
       title: song.title,
       artist: song.artist,
       url: song.url
     });
+    setCurrentPlaylist(songs);
+    setIsPlaying(true);
   };
-
-
-  const songs = [
-    {
-      id: 1,
-      title: "Sailor Song",
-      artist: "Gigi Perez",
-      duration: "3:29",
-      url: "/songs/sailor.mp3"
-    },
-    {
-      id: 2,
-      title: "The Days",
-      artist: "Chrystal, Notion",
-      duration: "3:53",
-      url: "./songs/days.mp3"
-    },
-    {
-      id: 3,
-      title: "End of Beginning",
-      artist: "Djo",
-      duration: "2:39",
-      url: "./songs/end.mp3"
-    },
-    {
-      id: 4,
-      title: "Escapism",
-      artist: "Raye, 070 Shake",
-      duration: "4:32",
-      url: "./songs/escapism.mp3"
-    },
-    {
-      id: 5,
-      title: "Feel It",
-      artist: "d4vd",
-      duration: "2:58",
-      url: "./songs/feel.mp3"
-    },
-    {
-      id: 6,
-      title: "Lady Killers II",
-      artist: "G-Eazy, Christoph Anderson",
-      duration: "4:57",
-      url: "./songs/lady.mp3"
-    },
-    {
-      id: 7,
-      title: "Multo",
-      artist: "Cup of Joe",
-      duration: "3:58",
-      url: "./songs/multo.mp3"
-    },
-    {
-      id: 8,
-      title: "Night Like This",
-      artist: "The Kid LARIO",
-      duration: "1:27",
-      url: "./songs/night.mp3"
-    },
-    {
-      id: 9,
-      title: "Sino",
-      artist: "Unique Salonga",
-      duration: "4:40",
-      url: "./songs/sino.mp3"
-    },
-    {
-      id: 10,
-      title: "Young and Beautiful",
-      artist: "Lana Del Rey",
-      duration: "3:56",
-      url: "./songs/young.mp3"
-    }
-  ];
   
   return (
     <div className="library">
       <div className="library-header">
         <h1>Your Library</h1>
-        <button 
-          className="create-playlist-btn"
-          onClick={() => setShowCreateForm(true)}
-        >
-          <i className="bi bi-plus-lg"></i>
-        </button>
+        <div className="header-buttons">
+          <button 
+            className="create-playlist-btn"
+            onClick={() => setShowCreateForm(true)}
+          >
+            <i className="bi bi-plus-lg"></i>
+          </button>
+          <label className="upload-btn">
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
+            <i className="bi bi-upload"></i>
+          </label>
+        </div>
       </div>
 
       {showCreateForm && (
@@ -142,7 +148,55 @@ function Library({ setCurrentSong }) {
         </div>
       )}
 
-    <div className="playlists">
+      {showSongForm && (
+        <div className="create-song-form">
+          <form onSubmit={handleSongFormSubmit}>
+            <div className="form-group">
+              <label>Title:</label>
+              <input
+                type="text"
+                value={newSongData.title}
+                onChange={(e) => setNewSongData({...newSongData, title: e.target.value})}
+                placeholder="Enter song title"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Artist:</label>
+              <input
+                type="text"
+                value={newSongData.artist}
+                onChange={(e) => setNewSongData({...newSongData, artist: e.target.value})}
+                placeholder="Enter artist name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Selected File:</label>
+              <div className="selected-file">{newSongData.file?.name}</div>
+            </div>
+            <div className="form-buttons">
+              <button type="submit">Add Song</button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowSongForm(false);
+                  setNewSongData({
+                    title: '',
+                    artist: '',
+                    file: null,
+                    tempUrl: ''
+                  });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="playlists">
         {playlists.map(playlist => (
           <div 
             key={playlist.id} 
@@ -159,16 +213,36 @@ function Library({ setCurrentSong }) {
         <h2>All Songs</h2>
         <div className="songs-content">
           {songs.length === 0 ? (
-            <p className="empty-message">No songs available</p>
+            <div className="empty-message">
+              <p>No songs available</p>
+              <label className="upload-btn-large">
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+                <i className="bi bi-cloud-upload"></i>
+                <span>Upload Songs</span>
+              </label>
+            </div>
           ) : (
             <div className="songs-list">
               {songs.map((song, index) => (
-                  <div className="song-item" 
-                    key={song.id} 
-                    onClick={() => handleSongClick(song)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                  <span className="song-number">{index + 1}</span>
+                <div 
+                  className="song-item" 
+                  key={song.id} 
+                  onClick={() => handleSongClick(song)}
+                >
+                  <div className="song-number-container">
+                    <span className="song-number">{index + 1}</span>
+                    <button 
+                      className="play-hover-button"
+                      onClick={(e) => handlePlayClick(e, song)}
+                    >
+                      <i className="bi bi-play-fill"></i>
+                    </button>
+                  </div>
                   <div className="song-info">
                     <span className="song-title">{song.title}</span>
                     <span className="song-artist">{song.artist}</span>

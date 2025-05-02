@@ -8,11 +8,14 @@ import Search from './pages/Search'
 import Library from './pages/Library'
 import MusicPlayer from './components/MusicPlayer'
 import Album from './pages/Album'
+import Song from './pages/Song'
 
 function App() {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [playlists, setPlaylists] = useState([]);
+  const [currentPlaylist, setCurrentPlaylist] = useState([]); 
+
   return (
     <div className="app-container">
       <BrowserRouter>
@@ -20,14 +23,28 @@ function App() {
           <Navbar/>
           <div className="content-area">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Home playlists={playlists} />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/library" element={<Library setCurrentSong={setCurrentSong} />} 
+              <Route path="/library" element={
+                <Library 
+                  setCurrentSong={setCurrentSong}
+                  playlists={playlists}
+                  setPlaylists={setPlaylists}
+                  setCurrentPlaylist={setCurrentPlaylist} 
+                />} 
               />
               <Route path="/album/:id" element={
                 <Album 
                   setCurrentSong={setCurrentSong} 
                   currentSong={currentSong}
+                  setIsPlaying={setIsPlaying}
+                  playlists={playlists}
+                  setCurrentPlaylist={setCurrentPlaylist} 
+                />
+              } />
+              <Route path="/song" element={
+                <Song 
+                  setCurrentSong={setCurrentSong}
                   setIsPlaying={setIsPlaying}
                 />
               } />
@@ -38,6 +55,8 @@ function App() {
           currentSong={currentSong}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
+          playlist={currentPlaylist} 
+          setCurrentSong={setCurrentSong}
         />
       </BrowserRouter>
     </div>

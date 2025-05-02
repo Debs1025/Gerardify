@@ -1,7 +1,10 @@
+/* Main container styling */
 .library {
   padding: 20px;
-  padding-bottom: 150px; 
+  padding-bottom: 150px; /* Extra padding for music player at bottom */
 }
+
+/* Header section with title and action buttons */
 .library-header {
   display: flex;
   justify-content: space-between;
@@ -9,7 +12,15 @@
   margin-bottom: 20px;
 }
 
-.create-playlist-btn {
+/* Container for create playlist and upload buttons */
+.header-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Styling for header action buttons */
+.create-playlist-btn, .upload-btn {
   background: none;
   border: none;
   color: #000000;
@@ -23,19 +34,23 @@
   transition: all 0.2s;
 }
 
-.create-playlist-btn:hover {
+/* Hover effects for add playlist */
+.create-playlist-btn:hover, .upload-btn:hover {
   color: rgb(255, 255, 255);
   transform: scale(1.1);
 }
 
-.create-playlist-form {
+/* Design for creating playlist and adding songs */
+.create-playlist-form, .create-song-form {
   background: #282828;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
 }
 
-.create-playlist-form input {
+/* Input fields styling for forms */
+.create-playlist-form input,
+.create-song-form input {
   width: 100%;
   padding: 10px;
   background: #3e3e3e;
@@ -45,28 +60,63 @@
   margin-bottom: 10px;
 }
 
+/* Import Music margin */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Labels title and artist */
+.form-group label {
+  display: block;
+  color: #fff;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* Display area for selected file name */
+.selected-file {
+  padding: 10px;
+  background: #3e3e3e;
+  border-radius: 4px;
+  color: #b3b3b3;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+/* Container for form action buttons */
 .form-buttons {
   display: flex;
   gap: 10px;
+  margin-top: 20px;
 }
 
+/* Button Designs */
 .form-buttons button {
   padding: 8px 16px;
   border: none;
   border-radius: 20px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
+/* Create action button */
 .form-buttons button[type="submit"] {
   background: #d51870;
   color: white;
 }
 
-.form-buttons button[type="button"] {
-  background: transparent;
-  color: #b3b3b3;
+/* Hover effect for submit button */
+.form-buttons button[type="submit"]:hover {
+  background: #f01b7c;
+  transform: scale(1.05);
 }
 
+/* Hover effect for cancel button */
+.form-buttons button[type="button"]:hover {
+  color: white;
+}
+
+/* Grid layout for playlists */
 .playlists {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -74,79 +124,105 @@
   margin-top: 20px;
 }
 
-.playlist-item {
+/* Empty state message */
+.empty-message {
+  text-align: center;
+  padding: 40px;
   background: #282828;
-  padding: 16px;
+  border-radius: 8px;
+  color: #b3b3b3;
+}
+
+/* Upload button when the song list is empty */
+.upload-btn-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 32px;
+  border: 2px dashed #3e3e3e;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s;
+  max-width: 300px;
 }
 
-.playlist-item:hover {
-  background: #3e3e3e;
+/* Hover effect for large upload button */
+.upload-btn-large:hover {
+  border-color: #d51870;
+  background: rgba(213, 24, 112, 0.1);
 }
 
-.playlist-item h3 {
-  margin: 0;
-  color: white;
-}
-
-.playlist-item p {
-  margin: 8px 0 0;
+/* Icon size of upload button */
+.upload-btn-large i {
+  font-size: 48px;
   color: #b3b3b3;
-  font-size: 14px;
 }
 
-/* Song Design */
-.songs-section {
-  margin-top: 48px;
-}
-
-.songs-section h2 {
-  color: #000000;
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
+/* Container for list of songs */
 .songs-list {
   background: #282828;
   border-radius: 8px;
   overflow: hidden;
 }
 
+/* Individual song item design */
 .song-item {
   display: grid;
-  grid-template-columns: 40px 1fr auto auto; 
-  gap: 16px; 
+  grid-template-columns: 40px 1fr auto;
+  gap: 16px;
   padding: 12px 16px;
   align-items: center;
-}
-.song-item:hover {
-  background: #3e3e3e;
-}
-
-.song-number {
-  color: #b3b3b3;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+/* Container for song title and artist */
 .song-info {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
-
-.song-title {
-  color: rgb(0, 0, 0);
-  font-weight: 500;
-}
-
-
+/* Song artist */
 .song-artist {
-  color: #acabab;
+  color: #b3b3b3;
   font-size: 14px;
 }
 
+/* Song Duration of the music */
 .song-duration {
-  color: #646464;
-  margin-left: 16px; 
+  color: #616161;
+  font-size: 14px;
+  margin-left: 16px;
+}
+
+/* Song Designs */
+.song-number-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.song-number {
+  transition: opacity 0.2s;
+}
+
+.play-hover-button {
+  position: absolute;
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.song-item:hover .song-number {
+  opacity: 0;
+}
+
+.song-item:hover .play-hover-button {
+  display: block;
 }

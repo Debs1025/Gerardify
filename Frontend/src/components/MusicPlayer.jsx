@@ -30,21 +30,48 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     };
   }, []);
 
-  //Dae pa nagagana
-  // Go Forward and Backward
+  // Previous and Next Song 
   const handleSkipForward = () => {
-    if (!playlist || !currentSong) return;
+    console.log('Current playlist:', playlist);
+    console.log('Current song:', currentSong); 
+    
+    if (!playlist?.length || !currentSong) {
+      console.log('No playlist or current song available');
+      return;
+    }
+    
     const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
-    if (currentIndex > -1 && currentIndex < playlist.length - 1) {
-      setCurrentSong(playlist[currentIndex + 1]);
+    console.log('Current index:', currentIndex); 
+    
+    if (currentIndex > -1) {
+      const nextIndex = (currentIndex + 1) % playlist.length;
+      console.log('Next index:', nextIndex); 
+      
+      const nextSong = playlist[nextIndex];
+      setCurrentSong({
+        id: nextSong.id,
+        title: nextSong.title,
+        artist: nextSong.artist,
+        url: nextSong.url
+      });
+      setIsPlaying(true);
     }
   };
   
   const handleSkipBackward = () => {
-    if (!playlist || !currentSong) return;
+    if (!playlist?.length || !currentSong) return;
+    
     const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
-    if (currentIndex > 0) {
-      setCurrentSong(playlist[currentIndex - 1]);
+    if (currentIndex > -1) {
+      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      const prevSong = playlist[prevIndex];
+      setCurrentSong({
+        id: prevSong.id,
+        title: prevSong.title,
+        artist: prevSong.artist,
+        url: prevSong.url
+      });
+      setIsPlaying(true);
     }
   };
 
