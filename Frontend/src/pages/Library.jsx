@@ -48,7 +48,19 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
   const handleSongFormSubmit = async (e) => {
     e.preventDefault();
     if (!newSongData.file || !newSongData.title.trim() || !newSongData.artist.trim()) return;
-
+  
+    // Check if song with same title and artist already exists
+    const isDuplicate = songs.some(
+      song => song.title.toLowerCase() === newSongData.title.toLowerCase() && 
+              song.artist.toLowerCase() === newSongData.artist.toLowerCase()
+              
+    );
+  
+    if (isDuplicate) {
+      alert('This song already exists in your library!');
+      return;
+    }
+  
     const audio = new Audio(newSongData.tempUrl);
     
     await new Promise((resolve) => {
@@ -57,7 +69,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         const minutes = Math.floor(duration / 60);
         const seconds = duration % 60;
         const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
+  
         const newSong = {
           id: Date.now() + Math.random(),
           title: newSongData.title,
@@ -65,14 +77,14 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
           duration: formattedDuration,
           url: newSongData.tempUrl
         };
-
+  
         setSongs(prevSongs => [...prevSongs, newSong]);
         setCurrentPlaylist([...songs, newSong]);
         resolve();
       });
     });
-
-    // Reset the song to add new song
+  
+    // Reset form after adding the song
     setNewSongData({
       title: '',
       artist: '',

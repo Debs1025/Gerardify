@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/pages/Song.css';
 
-function Song({ setCurrentSong, setIsPlaying, songs, setSongs }) {
+function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPlaylists }) {
   const location = useLocation();
   const navigate = useNavigate();
   const song = location.state?.song;
@@ -22,6 +22,7 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs }) {
   };
 
   const handleSave = () => {
+    // Update songs in library
     setSongs(prevSongs => {
       const updatedSongs = prevSongs.map(s => 
         s.id === song.id 
@@ -32,6 +33,25 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs }) {
       song.artist = editedSong.artist;
       return updatedSongs;
     });
+
+    // Update songs in all playlists/albums
+    setPlaylists(prevPlaylists => {
+      return prevPlaylists.map(playlist => {
+        const hasSong = playlist.songs.some(s => s.id === song.id);
+        if (hasSong) {
+          return {
+            ...playlist,
+            songs: playlist.songs.map(s => 
+              s.id === song.id 
+                ? { ...s, title: editedSong.title, artist: editedSong.artist }
+                : s
+            )
+          };
+        }
+        return playlist;
+      });
+    });
+
     setIsEditing(false);
     navigate('/song', { state: { song } });
   };

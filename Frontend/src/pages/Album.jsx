@@ -1,5 +1,3 @@
-// Pag binuksan ko si album iyo lang to ang mapplay sa music player 
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/pages/Album.css';
@@ -14,7 +12,8 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   const [currentAlbum, setCurrentAlbum] = useState(null);
   const [showAddSongs, setShowAddSongs] = useState(false);
   const [availableSongs, setAvailableSongs] = useState([]);
-
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
   // Set the current album based on the ID 
   useEffect(() => {
     const foundAlbum = playlists.find(playlist => playlist.id === parseInt(id));
@@ -33,6 +32,39 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
       setAvailableSongs(filtered);
     }
   }, [songs, currentAlbum]);
+
+  // Plays the songs only inside the album
+  useEffect(() => {
+  if (currentSong && currentAlbum) {
+    // Only play the song that belongs to the album if it is played in the album
+    if (currentSong.albumId === currentAlbum.id) {
+      const songIndex = currentAlbum.songs.findIndex(song => song.id === currentSong.id);
+      if (songIndex === -1) {
+        setIsPlaying(false);
+        setCurrentSong(null);
+      } else {
+        setCurrentIndex(songIndex);
+        setIsPlaying(true);
+      }
+    }
+  }
+}, [currentSong, currentAlbum]);
+
+  // Makes sure that it will change the song that can be played
+  // When the album is changed or leaves the album
+  useEffect(() => {
+    // Cleanup when leaving album or changing albums
+    return () => {
+      setIsPlaying(false);
+      setCurrentSong(null);
+      // Stop the audio playback
+      const audio = document.querySelector('audio');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
+  }, [id]);
 
   // Handle editing the album name and artist
   const handleEditClick = () => {
@@ -79,8 +111,17 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
 
   // Handle song click to play the song
   const handleSongClick = (song) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
+    if (currentAlbum.songs.includes(song)) {
+      const songIndex = currentAlbum.songs.findIndex(s => s.id === song.id);
+      setCurrentIndex(songIndex);
+      // Make sures the song is played from the album
+      setCurrentSong({
+        ...song, 
+        albumId: currentAlbum.id,
+        playlist: currentAlbum.songs 
+      });
+      setIsPlaying(true);
+    }
   };
 
   // Add song to the current album
@@ -88,7 +129,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   const handleAddSong = (songToAdd) => {
     setPlaylists(prevPlaylists => {
       return prevPlaylists.map(playlist => {
-        // Check if the playlist ID matches the current album ID
+        // Checks if the playlist ID matches the current album ID
         if (playlist.id === parseInt(id)) {
           if (!playlist.songs.some(song => song.id === songToAdd.id)) {
             const updatedPlaylist = {

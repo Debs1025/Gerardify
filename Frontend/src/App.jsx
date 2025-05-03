@@ -49,10 +49,12 @@ function App() {
               } />
               <Route path="/song" element={
                 <Song 
-                  setCurrentSong={setCurrentSong}
-                  setIsPlaying={setIsPlaying}
-                  songs={songs}
-                  setSongs={setSongs}
+                setCurrentSong={setCurrentSong}
+                setIsPlaying={setIsPlaying}
+                songs={songs}
+                setSongs={setSongs}
+                playlists={playlists}
+                setPlaylists={setPlaylists}
                 />
               } />
             </Routes>

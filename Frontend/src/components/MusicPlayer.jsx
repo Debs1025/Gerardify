@@ -1,5 +1,3 @@
-// Pag natapos si song automatically ma next song
-
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/components/MusicPlayer.css';
 
@@ -32,46 +30,52 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     };
   }, []);
 
+  // Skip to next song when current song ends
+  useEffect(() => {
+    const audio = audioRef.current;
+    
+    const handleEnded = () => {
+      handleSkipForward(); 
+    };
+  
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
+  }, [currentSong]); 
+
   // Previous and Next Song 
   const handleSkipForward = () => {
-    console.log('Current playlist:', playlist);
-    console.log('Current song:', currentSong); 
+    const songPlaylist = currentSong?.playlist || playlist;
     
-    if (!playlist?.length || !currentSong) {
-      console.log('No playlist or current song available');
-      return;
-    }
+    if (!songPlaylist?.length || !currentSong) return;
     
-    const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
-    console.log('Current index:', currentIndex); 
-    
+    const currentIndex = songPlaylist.findIndex(song => song.id === currentSong.id);
     if (currentIndex > -1) {
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      console.log('Next index:', nextIndex); 
-      
-      const nextSong = playlist[nextIndex];
+      const nextIndex = (currentIndex + 1) % songPlaylist.length;
+      const nextSong = songPlaylist[nextIndex];
+      // Make sures to play only songs from the same album if the song is played from an album
       setCurrentSong({
-        id: nextSong.id,
-        title: nextSong.title,
-        artist: nextSong.artist,
-        url: nextSong.url
+        ...nextSong,
+        albumId: currentSong.albumId, 
+        playlist: songPlaylist 
       });
       setIsPlaying(true);
     }
   };
   
   const handleSkipBackward = () => {
-    if (!playlist?.length || !currentSong) return;
+    const songPlaylist = currentSong?.playlist || playlist;
     
-    const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
+    if (!songPlaylist?.length || !currentSong) return;
+    
+    const currentIndex = songPlaylist.findIndex(song => song.id === currentSong.id);
     if (currentIndex > -1) {
-      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-      const prevSong = playlist[prevIndex];
+      const prevIndex = (currentIndex - 1 + songPlaylist.length) % songPlaylist.length;
+      const prevSong = songPlaylist[prevIndex];
+      // Make sures to play only songs from the same album if the song is played from an album
       setCurrentSong({
-        id: prevSong.id,
-        title: prevSong.title,
-        artist: prevSong.artist,
-        url: prevSong.url
+        ...prevSong,
+        albumId: currentSong.albumId, 
+        playlist: songPlaylist 
       });
       setIsPlaying(true);
     }
