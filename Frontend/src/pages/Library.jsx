@@ -1,13 +1,14 @@
+//nawara si like pag nag upload ka ning music tas nag upload ka ulit ning same file dpat dae pwede
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/pages/Library.css';
 
-function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, setIsPlaying }) {  
+function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, setIsPlaying, songs, setSongs }) {  
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showSongForm, setShowSongForm] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [songs, setSongs] = useState([]);
   const [newSongData, setNewSongData] = useState({
     title: '',
     artist: '',
@@ -65,17 +66,13 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
           url: newSongData.tempUrl
         };
 
-        setSongs(prevSongs => {
-          const updatedSongs = [...prevSongs, newSong];
-          setCurrentPlaylist(updatedSongs);
-          return updatedSongs;
-        });
-
+        setSongs(prevSongs => [...prevSongs, newSong]);
+        setCurrentPlaylist([...songs, newSong]);
         resolve();
       });
     });
 
-    // Reset form
+    // Reset the song to add new song
     setNewSongData({
       title: '',
       artist: '',
@@ -106,17 +103,17 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
   };
   
   return (
-    <div className="library">
+    <div className="library-container">
       <div className="library-header">
         <h1>Your Library</h1>
-        <div className="header-buttons">
+        <div className="library-header-buttons">
           <button 
-            className="create-playlist-btn"
+            className="library-create-btn"
             onClick={() => setShowCreateForm(true)}
           >
             <i className="bi bi-plus-lg"></i>
           </button>
-          <label className="upload-btn">
+          <label className="library-upload-btn">
             <input
               type="file"
               accept="audio/*"
@@ -129,7 +126,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
       </div>
 
       {showCreateForm && (
-        <div className="create-playlist-form">
+        <div className="library-form">
           <form onSubmit={handleCreatePlaylist}>
             <input
               type="text"
@@ -138,7 +135,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
               onChange={(e) => setNewPlaylistName(e.target.value)}
               autoFocus
             />
-            <div className="form-buttons">
+            <div className="library-form-buttons">
               <button type="submit">Create</button>
               <button type="button" onClick={() => setShowCreateForm(false)}>
                 Cancel
@@ -149,9 +146,9 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
       )}
 
       {showSongForm && (
-        <div className="create-song-form">
+        <div className="library-form">
           <form onSubmit={handleSongFormSubmit}>
-            <div className="form-group">
+            <div className="library-form-group">
               <label>Title:</label>
               <input
                 type="text"
@@ -161,7 +158,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="library-form-group">
               <label>Artist:</label>
               <input
                 type="text"
@@ -171,24 +168,21 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="library-form-group">
               <label>Selected File:</label>
-              <div className="selected-file">{newSongData.file?.name}</div>
+              <div className="library-selected-file">{newSongData.file?.name}</div>
             </div>
-            <div className="form-buttons">
+            <div className="library-form-buttons">
               <button type="submit">Add Song</button>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setShowSongForm(false);
-                  setNewSongData({
-                    title: '',
-                    artist: '',
-                    file: null,
-                    tempUrl: ''
-                  });
-                }}
-              >
+              <button type="button" onClick={() => {
+                setShowSongForm(false);
+                setNewSongData({
+                  title: '',
+                  artist: '',
+                  file: null,
+                  tempUrl: ''
+                });
+              }}>
                 Cancel
               </button>
             </div>
@@ -196,11 +190,11 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         </div>
       )}
 
-      <div className="playlists">
+      <div className="library-playlists-grid">
         {playlists.map(playlist => (
           <div 
             key={playlist.id} 
-            className="playlist-item"
+            className="library-playlist-item"
             onClick={() => handlePlaylistClick(playlist)}
           >
             <h3>{playlist.name}</h3>
@@ -209,13 +203,13 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         ))}
       </div>
 
-      <div className="songs-section">
+      <div className="library-songs-section">
         <h2>All Songs</h2>
-        <div className="songs-content">
+        <div className="library-songs-content">
           {songs.length === 0 ? (
-            <div className="empty-message">
+            <div className="library-empty-message">
               <p>No songs available</p>
-              <label className="upload-btn-large">
+              <label className="library-upload-btn-large">
                 <input
                   type="file"
                   accept="audio/*"
@@ -227,27 +221,27 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
               </label>
             </div>
           ) : (
-            <div className="songs-list">
+            <div className="library-songs-list">
               {songs.map((song, index) => (
                 <div 
-                  className="song-item" 
+                  className="library-song-item" 
                   key={song.id} 
                   onClick={() => handleSongClick(song)}
                 >
-                  <div className="song-number-container">
-                    <span className="song-number">{index + 1}</span>
+                  <div className="library-song-number-container">
+                    <span className="library-song-number">{index + 1}</span>
                     <button 
-                      className="play-hover-button"
+                      className="library-play-button"
                       onClick={(e) => handlePlayClick(e, song)}
                     >
                       <i className="bi bi-play-fill"></i>
                     </button>
                   </div>
-                  <div className="song-info">
-                    <span className="song-title">{song.title}</span>
-                    <span className="song-artist">{song.artist}</span>
+                  <div className="library-song-info">
+                    <span className="library-song-title">{song.title}</span>
+                    <span className="library-song-artist">{song.artist}</span>
                   </div>
-                  <span className="song-duration">{song.duration}</span>
+                  <span className="library-song-duration">{song.duration}</span>
                 </div>
               ))}
             </div>

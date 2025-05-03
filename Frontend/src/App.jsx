@@ -15,6 +15,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [currentPlaylist, setCurrentPlaylist] = useState([]); 
+  const [songs, setSongs] = useState([]);
 
   return (
     <div className="app-container">
@@ -31,6 +32,9 @@ function App() {
                   playlists={playlists}
                   setPlaylists={setPlaylists}
                   setCurrentPlaylist={setCurrentPlaylist} 
+                  songs={songs}  
+                  setSongs={setSongs}  
+                  setIsPlaying={setIsPlaying}
                 />} 
               />
               <Route path="/album/:id" element={
@@ -39,13 +43,16 @@ function App() {
                   currentSong={currentSong}
                   setIsPlaying={setIsPlaying}
                   playlists={playlists}
-                  setCurrentPlaylist={setCurrentPlaylist} 
+                  setPlaylists={setPlaylists}
+                  songs={songs}
                 />
               } />
               <Route path="/song" element={
                 <Song 
                   setCurrentSong={setCurrentSong}
                   setIsPlaying={setIsPlaying}
+                  songs={songs}
+                  setSongs={setSongs}
                 />
               } />
             </Routes>

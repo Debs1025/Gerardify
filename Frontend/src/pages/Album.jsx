@@ -1,14 +1,10 @@
-//Fix and delete dapat nadedelete album sa playlist and home
-//Dapat nakakaedit den kang title and pangaran 
-//Dapat nakakaadd ng songs sa album
-//Dapat nakakaedit ng songs sa album
-//Dapat nakaka delete ng songs sa album
+// Pag binuksan ko si album iyo lang to ang mapplay sa music player 
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/pages/Album.css';
 
-function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
+function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlaylists, songs }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -16,8 +12,10 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
   const [editedName, setEditedName] = useState('');
   const [editedArtist, setEditedArtist] = useState('');
   const [currentAlbum, setCurrentAlbum] = useState(null);
+  const [showAddSongs, setShowAddSongs] = useState(false);
+  const [availableSongs, setAvailableSongs] = useState([]);
 
-  // Find the current playlist/album using the id from URL params
+  // Set the current album based on the ID 
   useEffect(() => {
     const foundAlbum = playlists.find(playlist => playlist.id === parseInt(id));
     if (foundAlbum) {
@@ -27,12 +25,36 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
     }
   }, [id, playlists]);
 
+  // Show available songs to add to the current album
+  useEffect(() => {
+    if (songs && currentAlbum) {
+      const albumSongIds = currentAlbum.songs.map(song => song.id);
+      const filtered = songs.filter(song => !albumSongIds.includes(song.id));
+      setAvailableSongs(filtered);
+    }
+  }, [songs, currentAlbum]);
+
+  // Handle editing the album name and artist
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
+  // Handle saving the edited album name and artist
   const handleSaveEdit = () => {
     if (editedName.trim() && editedArtist.trim()) {
+      setPlaylists(prevPlaylists => {
+        return prevPlaylists.map(playlist => {
+          if (playlist.id === parseInt(id)) {
+            return {
+              ...playlist,
+              name: editedName,
+              artist: editedArtist
+            };
+          }
+          return playlist;
+        });
+      });
+      // Update the current album state
       setCurrentAlbum({
         ...currentAlbum,
         name: editedName,
@@ -42,23 +64,71 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
     }
   };
 
+  // Handle deleting the album
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
 
+  // Confirm delete of the album
   const confirmDelete = () => {
+    setPlaylists(prevPlaylists => 
+      prevPlaylists.filter(playlist => playlist.id !== parseInt(id))
+    );
     navigate('/library');
   };
 
+  // Handle song click to play the song
   const handleSongClick = (song) => {
     setCurrentSong(song);
     setIsPlaying(true);
   };
 
+  // Add song to the current album
+  // Check if the song is already in the album before adding it
+  const handleAddSong = (songToAdd) => {
+    setPlaylists(prevPlaylists => {
+      return prevPlaylists.map(playlist => {
+        // Check if the playlist ID matches the current album ID
+        if (playlist.id === parseInt(id)) {
+          if (!playlist.songs.some(song => song.id === songToAdd.id)) {
+            const updatedPlaylist = {
+              ...playlist,
+              songs: [...playlist.songs, songToAdd]
+            };
+            setCurrentAlbum(updatedPlaylist);
+            return updatedPlaylist;
+          }
+        }
+        return playlist;
+      });
+    });
+    setShowAddSongs(false);
+  };
+
+  // Remove song from the current album
+  const handleRemoveSong = (songId, e) => {
+    e.stopPropagation();
+    setPlaylists(prevPlaylists => {
+      return prevPlaylists.map(playlist => {
+        // Check if the playlist ID matches the current album ID
+        if (playlist.id === parseInt(id)) {
+          const updatedPlaylist = {
+            ...playlist,
+            songs: playlist.songs.filter(song => song.id !== songId)
+          };
+          setCurrentAlbum(updatedPlaylist);
+          return updatedPlaylist;
+        }
+        return playlist;
+      });
+    });
+  };
+
+  // Check if the album exists
   if (!currentAlbum) {
     return <div className="empty-message">Album not found</div>;
   }
-  
+
   return (
     <div className="album-view">
       <div className="album-header">
@@ -126,7 +196,46 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
       )}
 
       <div className="songs-section">
-        <h2>Songs</h2>
+        <div className="songs-header">
+          <h2>Songs</h2>
+          <button className="add-songs-btn" onClick={() => setShowAddSongs(true)}>
+            <i className="bi bi-plus-lg"></i> Add Songs
+          </button>
+        </div>
+
+        {showAddSongs && (
+          <div className="add-songs-modal">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3>Add Songs to {currentAlbum.name}</h3>
+                <button className="close-modal-btn" onClick={() => setShowAddSongs(false)}>
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <div className="available-songs">
+                {availableSongs.length === 0 ? (
+                  <p className="empty-message">No songs available to add</p>
+                ) : (
+                  availableSongs.map(song => (
+                    <div key={song.id} className="available-song-item">
+                      <div className="song-info">
+                        <span className="song-title">{song.title}</span>
+                        <span className="song-artist">{song.artist}</span>
+                      </div>
+                      <button 
+                        className="add-song-btn"
+                        onClick={() => handleAddSong(song)}
+                      >
+                        <i className="bi bi-plus-lg"></i>
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="songs-content">
           {currentAlbum.songs.length === 0 ? (
             <p className="empty-message">No songs available</p>
@@ -136,14 +245,21 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists }) {
                 <div 
                   key={song.id} 
                   className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
-                  onClick={() => handleSongClick(song)}
                 >
-                  <span className="song-number">{index + 1}</span>
-                  <div className="song-info">
-                    <span className="song-title">{song.title}</span>
-                    <span className="song-artist">{song.artist}</span>
+                  <div className="song-item-content" onClick={() => handleSongClick(song)}>
+                    <span className="song-number">{index + 1}</span>
+                    <div className="song-info">
+                      <span className="song-title">{song.title}</span>
+                      <span className="song-artist">{song.artist}</span>
+                    </div>
+                    <span className="song-duration">{song.duration}</span>
                   </div>
-                  <span className="song-duration">{song.duration}</span>
+                  <button 
+                    className="remove-song-btn"
+                    onClick={(e) => handleRemoveSong(song.id, e)}
+                  >
+                    <i className="bi bi-x"></i>
+                  </button>
                 </div>
               ))}
             </div>

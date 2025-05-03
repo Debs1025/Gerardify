@@ -1,3 +1,5 @@
+// Pag natapos si song automatically ma next song
+
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/components/MusicPlayer.css';
 
