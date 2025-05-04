@@ -1,29 +1,38 @@
+// Import necessary React hooks and styles
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/components/MusicPlayer.css';
 
+// MusicPlayer component that accepts props for controlling music playback
 function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurrentSong }) {
+  // Audio element reference for playing music
   const audioRef = useRef(new Audio());
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [prevVolume, setPrevVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  
+  // State variables for tracking playback information
+  const [currentTime, setCurrentTime] = useState(0);   // Current playback time
+  const [duration, setDuration] = useState(0);         // Total song duration
+  const [volume, setVolume] = useState(1);             // Current volume level (0-1)
+  const [prevVolume, setPrevVolume] = useState(1);     // For storing previous volume level after muting 
+  const [isMuted, setIsMuted] = useState(false);       // Mute state
 
-  // Manage Progress Bar and Time
+  // Effect hook to manage progress bar and time updates
   useEffect(() => {
     const audio = audioRef.current;
 
+    // Update current time of the song as it plays
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
     };
 
+    // Set duration when song is loaded
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
     };
 
+    // Event listeners for tracking playback progress
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
+    // Cleanup function to remove event listeners
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -33,7 +42,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
   // Skip to next song when current song ends
   useEffect(() => {
     const audio = audioRef.current;
-    
+  
     const handleEnded = () => {
       handleSkipForward(); 
     };
@@ -62,6 +71,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     }
   };
   
+  // Skip to previous song
   const handleSkipBackward = () => {
     const songPlaylist = currentSong?.playlist || playlist;
     
@@ -94,7 +104,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     audioRef.current.currentTime = newTime;
   };
 
-  // Play Audio and Display Song
+  // Load the current song when it changes
   useEffect(() => {
     if (currentSong) {
       console.log('Loading song:', currentSong); 
@@ -106,6 +116,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     }
   }, [currentSong]); 
 
+  // Play/Pause Audio
   useEffect(() => {
     if (currentSong) {
       if (isPlaying) {
@@ -133,6 +144,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
     }
   };
 
+  // Mute/Unmute Audio
   const toggleMute = () => {
     if (isMuted) {
       setVolume(prevVolume);
@@ -148,7 +160,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
 
   return (
     <div className="music-player">
-      {/* Left section */}
+      {/* Left section - displays the songs' info */}
       <div className="left-section">
         {currentSong ? (
           <div className="song-info">
@@ -162,7 +174,7 @@ function MusicPlayer({ currentSong, isPlaying, setIsPlaying, playlist, setCurren
         )}
       </div>
   
-      {/* Middle section */}
+      {/* Middle section - displays the prev, play/pause, next and progress bar*/}
       <div className="middle-section">
         <div className="player-controls">
           <button className="control-button" onClick={handleSkipBackward}>

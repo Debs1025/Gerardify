@@ -1,24 +1,26 @@
-//nawara si like pag nag upload ka ning music tas nag upload ka ulit ning same file dpat dae pwede
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/pages/Library.css';
 
-function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, setIsPlaying, songs, setSongs }) {  
+function Library({ setCurrentSong, currentSong, playlists, setPlaylists, setCurrentPlaylist, setIsPlaying, songs, setSongs }) {
   const navigate = useNavigate();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showSongForm, setShowSongForm] = useState(false);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [newSongData, setNewSongData] = useState({
+
+  const [showCreateForm, setShowCreateForm] = useState(false); // state for creating an album/playlist
+  const [showSongForm, setShowSongForm] = useState(false);     // state for showing the data form for a new song
+  const [newPlaylistName, setNewPlaylistName] = useState('');  // state for new playlist/album name
+  const [newSongData, setNewSongData] = useState({             // state for new song data
     title: '',
     artist: '',
     file: null,
     tempUrl: ''
   });
 
+  // For creating a new playlist/album
   const handleCreatePlaylist = (e) => { 
     e.preventDefault();
+    // .trim to avoid empty names
     if (newPlaylistName.trim()) {
+      // Sets the new playlist with a unique ID and default values
       setPlaylists([...playlists, { 
         id: Date.now(), 
         name: newPlaylistName,
@@ -27,42 +29,46 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         songs: []
       }]);
       setNewPlaylistName('');
-      setShowCreateForm(false);
+      setShowCreateForm(false);  // Close the form after creating a playlist
     }
   };
 
+  // For selecting a file to upload
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
+      // Store selected file and generate temp URL for preview
       setNewSongData({
         ...newSongData,
         file: file,
         tempUrl: url,
-        title: file.name.replace(/\.[^/.]+$/, "")
+        title: file.name.replace(/\.[^/.]+$/, "") // Set default title from filename
       });
-      setShowSongForm(true);
+      setShowSongForm(true); 
     }
   };
 
+  // For submitting the song
   const handleSongFormSubmit = async (e) => {
     e.preventDefault();
     if (!newSongData.file || !newSongData.title.trim() || !newSongData.artist.trim()) return;
   
-    // Check if song with same title and artist already exists
+    // Checks for duplicated song 
     const isDuplicate = songs.some(
       song => song.title.toLowerCase() === newSongData.title.toLowerCase() && 
               song.artist.toLowerCase() === newSongData.artist.toLowerCase()
-              
     );
   
     if (isDuplicate) {
       alert('This song already exists in your library!');
       return;
     }
-  
+    
+    // for getting the duration of the song
     const audio = new Audio(newSongData.tempUrl);
     
+    // Wait for metadata to load so we can get duration
     await new Promise((resolve) => {
       audio.addEventListener('loadedmetadata', () => {
         const duration = Math.floor(audio.duration);
@@ -70,6 +76,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         const seconds = duration % 60;
         const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
   
+        // Create new song object
         const newSong = {
           id: Date.now() + Math.random(),
           title: newSongData.title,
@@ -78,13 +85,14 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
           url: newSongData.tempUrl
         };
   
+        // Add new song to library and current playlist
         setSongs(prevSongs => [...prevSongs, newSong]);
         setCurrentPlaylist([...songs, newSong]);
         resolve();
       });
     });
   
-    // Reset form after adding the song
+    // Reset song form after adding for other new songs
     setNewSongData({
       title: '',
       artist: '',
@@ -94,23 +102,26 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
     setShowSongForm(false);
   };
 
+  // Go to the playlist/album page
   const handlePlaylistClick = (playlist) => {
     navigate(`/album/${playlist.id}`);
   };
 
+  // Navigate to song detail page
   const handleSongClick = (song) => {
     navigate('/song', { state: { song } });
   };
 
+  // Play selected song 
   const handlePlayClick = (e, song) => {
-    e.stopPropagation(); 
+    e.stopPropagation(); // Prevents opening the song detail page when clicking play button
     setCurrentSong({
       id: song.id,
       title: song.title,
       artist: song.artist,
       url: song.url
     });
-    setCurrentPlaylist(songs);
+    setCurrentPlaylist(songs); // Set full song list as current playlist
     setIsPlaying(true);
   };
   
@@ -119,12 +130,14 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
       <div className="library-header">
         <h1>Your Library</h1>
         <div className="library-header-buttons">
+          {/* Button to show create playlist  */}
           <button 
             className="library-create-btn"
             onClick={() => setShowCreateForm(true)}
           >
             <i className="bi bi-plus-lg"></i>
           </button>
+          {/* Upload song */}
           <label className="library-upload-btn">
             <input
               type="file"
@@ -137,6 +150,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         </div>
       </div>
 
+      {/* Create playlist form */}
       {showCreateForm && (
         <div className="library-form">
           <form onSubmit={handleCreatePlaylist}>
@@ -157,6 +171,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         </div>
       )}
 
+      {/* Form for adding the song */}
       {showSongForm && (
         <div className="library-form">
           <form onSubmit={handleSongFormSubmit}>
@@ -202,6 +217,7 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         </div>
       )}
 
+      {/* Display playlists */}
       <div className="library-playlists-grid">
         {playlists.map(playlist => (
           <div 
@@ -215,10 +231,12 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
         ))}
       </div>
 
+      {/* Display all songs */}
       <div className="library-songs-section">
         <h2>All Songs</h2>
         <div className="library-songs-content">
           {songs.length === 0 ? (
+            // If no songs are available
             <div className="library-empty-message">
               <p>No songs available</p>
               <label className="library-upload-btn-large">
@@ -233,10 +251,11 @@ function Library({ setCurrentSong, playlists, setPlaylists, setCurrentPlaylist, 
               </label>
             </div>
           ) : (
+            // If songs are available
             <div className="library-songs-list">
               {songs.map((song, index) => (
                 <div 
-                  className="library-song-item" 
+                  className={`library-song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
                   key={song.id} 
                   onClick={() => handleSongClick(song)}
                 >

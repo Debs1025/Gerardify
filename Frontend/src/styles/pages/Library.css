@@ -254,3 +254,25 @@
 .library-songs-content {
   margin-top: 20px;
 }
+
+/* Current Song playing design */
+.library-song-item.playing {
+  background: #d51870;
+}
+
+.library-song-item.playing .library-song-title {
+  color: #ffffff;
+}
+
+.library-song-item.playing .library-song-number,
+.library-song-item.playing .library-song-duration {
+  color: #ffffff;
+}
+
+.library-song-item.playing .library-song-artist {
+  color: #ffffff;
+}
+
+.library-song-item.playing:hover {
+  background: #4d4d4d;
+}

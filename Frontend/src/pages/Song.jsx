@@ -2,39 +2,43 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/pages/Song.css';
 
-function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPlaylists }) {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const song = location.state?.song;
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedSong, setEditedSong] = useState(song || {});
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+function Song({ setCurrentSong, setIsPlaying, songs, setSongs, setPlaylists }) {
+  const location = useLocation(); // For getting the song passed from the library
+  const navigate = useNavigate(); // For navigation when clicking buttons
+  const song = location.state?.song; // Retrieve the selected song from location state
+  const [isEditing, setIsEditing] = useState(false); // For toggling edit mode
+  const [editedSong, setEditedSong] = useState(song || {}); // Holds the song details for editing
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // For showing delete confirmation 
 
+  // Function to play the selected song
   const handlePlay = () => {
     if (song) {
-      setCurrentSong(song);
-      setIsPlaying(true);
+      setCurrentSong(song); // Se the current song as the selected song
+      setIsPlaying(true);   // Start playing
     }
   };
 
+  // For editing the song details
   const handleEdit = () => {
     setIsEditing(true);
   };
 
+  // Save edited song details to library and playlists
   const handleSave = () => {
-    // Update songs in library
+    // Update song in main library
     setSongs(prevSongs => {
       const updatedSongs = prevSongs.map(s => 
         s.id === song.id 
-          ? { ...s, title: editedSong.title, artist: editedSong.artist }
+          ? { ...s, title: editedSong.title, artist: editedSong.artist } // Update title/artist if IDs match
           : s
       );
+      // Reflect changes in the `song` object used by the component
       song.title = editedSong.title;
       song.artist = editedSong.artist;
       return updatedSongs;
     });
 
-    // Update songs in all playlists/albums
+    // Updates playlists to reflect the edited song
     setPlaylists(prevPlaylists => {
       return prevPlaylists.map(playlist => {
         const hasSong = playlist.songs.some(s => s.id === song.id);
@@ -52,35 +56,40 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPla
       });
     });
 
-    setIsEditing(false);
-    navigate('/song', { state: { song } });
+    setIsEditing(false); // Exit editing mode
+    navigate('/song', { state: { song } }); // Refresh the page with updated song state
   };
 
+  // For deleting the song
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
 
+  // Confirm delete of the song
   const confirmDelete = () => {
-    const updatedSongs = songs.filter(s => s.id !== song.id);
-    localStorage.setItem('songs', JSON.stringify(updatedSongs));
-    setSongs(updatedSongs);
-    navigate('/library');
+    const updatedSongs = songs.filter(s => s.id !== song.id); // Filter out the song
+    localStorage.setItem('songs', JSON.stringify(updatedSongs)); // Updates local storage
+    setSongs(updatedSongs); // Update the songs state
+    navigate('/library'); // Go back to library page
   };
 
+  // Cancel delete 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
   };
 
+  // If no song was passed, show a message
   if (!song) return <div>No song selected</div>;
 
   return (
     <div className="song-details">
       <div className="song-header">
         <div className="song-cover">
-          <i className="bi bi-music-note"></i>
+          <i className="bi bi-music-note"></i> {/* Placeholder for song cover */}
         </div>
         <div className="song-info">
           {isEditing ? (
+            // Edit mode
             <div className="edit-form">
               <input
                 type="text"
@@ -100,6 +109,7 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPla
               </div>
             </div>
           ) : (
+            // Display mode
             <>
               <h1>{song.title}</h1>
               <p className="artist">{song.artist}</p>
@@ -109,6 +119,7 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPla
                 </span>
               </div>
               <div className="song-actions">
+                {/* Buttons for play, edit, delete */}
                 <button className="play-button" onClick={handlePlay}>
                   <i className="bi bi-play-fill"></i> Play
                 </button>
@@ -124,6 +135,7 @@ function Song({ setCurrentSong, setIsPlaying, songs, setSongs, playlists, setPla
         </div>
       </div>
 
+      {/* Delete confirmation dialog */}
       {showDeleteConfirm && (
         <div className="delete-confirmation-overlay">
           <div className="delete-confirmation">

@@ -1,18 +1,24 @@
+// Import useState and useEffect from React
+// Import useParams and useNavigate from react-router-dom
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../styles/pages/Album.css';
+import '../styles/pages/Album.css'; 
 
+// album function to display the album details and songs
 function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlaylists, songs }) {
+  
+  // URL parameter for album ID and navigate function for navigation
   const { id } = useParams();
   const navigate = useNavigate();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState('');
-  const [editedArtist, setEditedArtist] = useState('');
-  const [currentAlbum, setCurrentAlbum] = useState(null);
-  const [showAddSongs, setShowAddSongs] = useState(false);
-  const [availableSongs, setAvailableSongs] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);    // Controls delete confirm
+  const [isEditing, setIsEditing] = useState(false);               // Controls edit mode
+  const [editedName, setEditedName] = useState('');                // Stores edited album name
+  const [editedArtist, setEditedArtist] = useState('');           //  State for edited artist
+  const [currentAlbum, setCurrentAlbum] = useState(null);          // Stores current album data
+  const [availableSongs, setAvailableSongs] = useState([]);        // Stores songs that can be added
+  const [showAddSongs, setShowAddSongs] = useState(false);        //  Controls add songs modal
+  const [currentIndex, setCurrentIndex] = useState(0);            //  Track current song index
   
   // Set the current album based on the ID 
   useEffect(() => {
@@ -36,7 +42,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   // Plays the songs only inside the album
   useEffect(() => {
   if (currentSong && currentAlbum) {
-    // Only play the song that belongs to the album if it is played in the album
+    // Only play the song that belongs to the album 
     if (currentSong.albumId === currentAlbum.id) {
       const songIndex = currentAlbum.songs.findIndex(song => song.id === currentSong.id);
       if (songIndex === -1) {
@@ -53,19 +59,12 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   // Makes sure that it will change the song that can be played
   // When the album is changed or leaves the album
   useEffect(() => {
-    // Cleanup when leaving album or changing albums
     return () => {
-      setIsPlaying(false);
-      setCurrentSong(null);
-      // Stop the audio playback
-      const audio = document.querySelector('audio');
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
+      if (currentSong?.albumId === parseInt(id)) {
       }
     };
-  }, [id]);
-
+  }, [id, currentSong]);
+  
   // Handle editing the album name and artist
   const handleEditClick = () => {
     setIsEditing(true);
@@ -114,7 +113,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
     if (currentAlbum.songs.includes(song)) {
       const songIndex = currentAlbum.songs.findIndex(s => s.id === song.id);
       setCurrentIndex(songIndex);
-      // Make sures the song is played from the album
+      // Makes sure to play only song from the same album
       setCurrentSong({
         ...song, 
         albumId: currentAlbum.id,
@@ -171,11 +170,11 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   }
 
   return (
-    <div className="album-view">
-      <div className="album-header">
-        <div className="album-info-wrapper">
+    <div className="album-view"> {/* Main container for the album view */}
+      <div className="album-header"> {/* Header section with album details and actions */}
+        <div className="album-info-wrapper"> 
           {isEditing ? (
-            <div className="edit-form">
+            <div className="edit-form"> {/* Form for editing album name and artist */}
               <input
                 type="text"
                 value={editedName}
@@ -191,7 +190,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
                 className="edit-input"
                 placeholder="Artist name"
               />
-              <div className="edit-buttons">
+              <div className="edit-buttons"> {/* Buttons to save or cancel edit */}
                 <button className="save-btn" onClick={handleSaveEdit}>
                   <i className="bi bi-check2"></i>
                 </button>
@@ -202,7 +201,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
             </div>
           ) : (
             <>
-              <div className="album-title-container">
+              <div className="album-title-container"> {/* Displays album title and edit button */}
                 <h1>{currentAlbum.name}</h1>
                 <button className="edit-btn" onClick={handleEditClick}>
                   <i className="bi bi-pencil"></i>
@@ -214,17 +213,17 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
             </>
           )}
         </div>
-        <button className="delete-btn" onClick={handleDelete}>
+        <button className="delete-btn" onClick={handleDelete}> {/* Delete album button */}
           <i className="bi bi-trash"></i>
         </button>
       </div>
-
+  
       {showDeleteModal && (
-        <div className="delete-modal">
-          <div className="delete-modal-content">
+        <div className="delete-modal"> {/* Delete Confirm*/}
+          <div className="delete-modal-content"> {/* Content box inside the delete */}
             <h2>Delete Playlist</h2>
             <p>Are you sure you want to delete this playlist?</p>
-            <div className="delete-modal-buttons">
+            <div className="delete-modal-buttons"> {/* Buttons for confirming or not */}
               <button className="confirm-delete-btn" onClick={confirmDelete}>
                 Yes
               </button>
@@ -235,31 +234,31 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
           </div>
         </div>
       )}
-
-      <div className="songs-section">
-        <div className="songs-header">
+  
+      <div className="songs-section"> {/* Section containing songs list */}
+        <div className="songs-header"> {/* Header for songs section with Add Songs button */}
           <h2>Songs</h2>
           <button className="add-songs-btn" onClick={() => setShowAddSongs(true)}>
             <i className="bi bi-plus-lg"></i> Add Songs
           </button>
         </div>
-
+  
         {showAddSongs && (
-          <div className="add-songs-modal">
-            <div className="modal-content">
-              <div className="modal-header">
+          <div className="add-songs-modal"> {/* shows the add song */}
+            <div className="modal-content"> {/* Content box */}
+              <div className="modal-header"> {/* Header */}
                 <h3>Add Songs to {currentAlbum.name}</h3>
                 <button className="close-modal-btn" onClick={() => setShowAddSongs(false)}>
                   <i className="bi bi-x-lg"></i>
                 </button>
               </div>
-              <div className="available-songs">
+              <div className="available-songs"> {/* List of available songs to add */}
                 {availableSongs.length === 0 ? (
                   <p className="empty-message">No songs available to add</p>
                 ) : (
                   availableSongs.map(song => (
-                    <div key={song.id} className="available-song-item">
-                      <div className="song-info">
+                    <div key={song.id} className="available-song-item"> {/*available songs*/}
+                      <div className="song-info"> {/* Song info inside available song */}
                         <span className="song-title">{song.title}</span>
                         <span className="song-artist">{song.artist}</span>
                       </div>
@@ -276,20 +275,20 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
             </div>
           </div>
         )}
-
-        <div className="songs-content">
+  
+        <div className="songs-content"> {/* Container for songs list */}
           {currentAlbum.songs.length === 0 ? (
             <p className="empty-message">No songs available</p>
           ) : (
-            <div className="songs-list">
+            <div className="songs-list"> {/* List of songs inside the album */}
               {currentAlbum.songs.map((song, index) => (
                 <div 
                   key={song.id} 
                   className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
-                >
-                  <div className="song-item-content" onClick={() => handleSongClick(song)}>
+                > {/* Individual song item, highlights if currently playing */}
+                  <div className="song-item-content" onClick={() => handleSongClick(song)}> {/* Clickable song content */}
                     <span className="song-number">{index + 1}</span>
-                    <div className="song-info">
+                    <div className="song-info"> {/* Song title and artist */}
                       <span className="song-title">{song.title}</span>
                       <span className="song-artist">{song.artist}</span>
                     </div>
@@ -298,7 +297,7 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
                   <button 
                     className="remove-song-btn"
                     onClick={(e) => handleRemoveSong(song.id, e)}
-                  >
+                  > {/* Remove song button */}
                     <i className="bi bi-x"></i>
                   </button>
                 </div>
@@ -310,5 +309,6 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
     </div>
   );
 }
+  
 
 export default Album;
