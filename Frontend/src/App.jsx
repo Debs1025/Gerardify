@@ -11,7 +11,7 @@ import Song from './pages/Song'
 
 function App() {
   const [currentSong, setCurrentSong] = useState(null); // Use for managing the current song
-  const [isPlaying, setIsPlaying] = useState(false);    // Use for managing the current playing song
+  const [isPlaying, setIsPlaying] = useState(false);    // Use for checking if the song is playing
   const [playlists, setPlaylists] = useState([]);       // Use for managing the playlists
   const [currentPlaylist, setCurrentPlaylist] = useState([]);  // Use for managing the current playlist
   const [songs, setSongs] = useState([]);               // Use for managing the songs 
