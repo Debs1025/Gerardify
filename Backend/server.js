@@ -1,153 +1,169 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+// Import required modules
+import express from 'express'; // Web framework for Node.js
+import mongoose from 'mongoose'; // MongoDB object modeling tool
+import cors from 'cors'; // Middleware for enabling CORS
+import multer from 'multer'; // Middleware for handling file uploads
+import path from 'path'; // Module for handling file paths
+import { fileURLToPath } from 'url'; // Utility to handle ES module file paths
+import fs from 'fs'; // File system module for file operations
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Resolve __filename and __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url); // Get current file's path
+const __dirname = path.dirname(__filename); // Get directory name
 
+// Initialize Express app
 const app = express();
-const PORT = 5001;
+const PORT = 5001; // Define server port
 
-app.use(cors());
-app.use(express.json());
+// Configure middleware
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(express.json()); // Parse JSON request bodies
 
-const songsDir = 'C:\\Users\\gerard\\Downloads\\Gerardify-main\\Gerardify-main\\Frontend\\songs';
-app.use('/songs', express.static(songsDir));
+// Serve static files from songs directory
+const songsDir = 'C:\\Users\\gerard\\Downloads\\Gerardify-main\\Gerardify-main\\Frontend\\songs'; // Path to songs directory
+app.use('/songs', express.static(songsDir)); // Serve songs as static files
 
+// Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/gerardifydb', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useNewUrlParser: true, // Use new URL parser
+  useUnifiedTopology: true, // Use new topology engine
 });
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => console.log('Connected to MongoDB'));
+db.on('error', console.error.bind(console, 'MongoDB connection error:')); // Log connection errors
+db.once('open', () => console.log('Connected to MongoDB')); // Log successful connection
 
+// Define Mongoose schemas
 const songSchema = new mongoose.Schema({
-  title: String,
-  artist: String,
-  duration: String,
-  url: String,
-  createdAt: { type: Date, default: Date.now },
+  title: String, // Song title
+  artist: String, // Song artist
+  duration: String, // Song duration
+  url: String, // URL to song file
+  createdAt: { type: Date, default: Date.now }, // Creation timestamp
 });
 
 const playlistSchema = new mongoose.Schema({
-  name: String,
-  artist: String,
-  year: Number,
-  songs: [songSchema],
-  createdAt: { type: Date, default: Date.now },
+  name: String, // Playlist name
+  artist: String, // Playlist artist
+  year: Number, // Playlist year
+  songs: [songSchema], // Array of songs
+  createdAt: { type: Date, default: Date.now }, // Creation timestamp
 });
 
-const Song = mongoose.model('Song', songSchema);
-const Playlist = mongoose.model('Playlist', playlistSchema);
+// Create Mongoose models
+const Song = mongoose.model('Song', songSchema); // Song model
+const Playlist = mongoose.model('Playlist', playlistSchema); // Playlist model
 
+// Configure Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, songsDir);
+    cb(null, songsDir); // Save files to songs directory
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+    cb(null, Date.now() + path.extname(file.originalname)); // Use timestamp + original extension as filename
   },
 });
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3']; // Allowed audio file types
     if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error('Only audio files are allowed'));
+      return cb(new Error('Only audio files are allowed')); // Reject non-audio files
     }
-    cb(null, true);
+    cb(null, true); // Accept valid files
   },
 });
 
+// Route to create a new playlist
 app.post('/playlists', async (req, res) => {
   try {
-    const playlist = new Playlist(req.body);
-    await playlist.save();
-    res.status(201).json({ message: 'Playlist created successfully', playlist });
+    const playlist = new Playlist(req.body); // Create new playlist from request body
+    await playlist.save(); // Save to database
+    res.status(201).json({ message: 'Playlist created successfully', playlist }); // Return success response
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message }); // Handle errors
   }
 });
 
+// Route to get all playlists
 app.get('/playlists', async (req, res) => {
   try {
-    const playlists = await Playlist.find();
-    res.json(playlists);
+    const playlists = await Playlist.find(); // Fetch all playlists
+    res.json(playlists); // Return playlists
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message }); // Handle errors
   }
 });
 
+// Route to upload a new song
 app.post('/songs', upload.single('file'), async (req, res) => {
   try {
-    const { title, artist, duration } = req.body;
+    const { title, artist, duration } = req.body; // Extract song metadata
     const song = new Song({
       title,
       artist,
       duration,
-      url: `/songs/${req.file.filename}`,
+      url: `/songs/${req.file.filename}`, // Store relative URL to song file
     });
-    await song.save();
-    res.status(201).json({ message: 'Song uploaded successfully', song });
+    await song.save(); // Save song to database
+    res.status(201).json({ message: 'Song uploaded successfully', song }); // Return success response
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message }); // Handle errors
   }
 });
 
+// Route to get all songs
 app.get('/songs', async (req, res) => {
   try {
-    const songs = await Song.find();
-    res.json(songs);
+    const songs = await Song.find(); // Fetch all songs
+    res.json(songs); // Return songs
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message }); // Handle errors
   }
 });
 
+// Route to update a song by ID
 app.put('/songs/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { title, artist, duration } = req.body;
-      if (!title || !artist) {
-        return res.status(400).json({ error: 'Title and artist are required' });
-      }
-      const updatedSong = await Song.findByIdAndUpdate(
-        id,
-        { title, artist, duration },
-        { new: true, runValidators: true }
-      );
-      if (!updatedSong) {
-        return res.status(404).json({ error: 'Song not found' });
-      }
-      res.status(200).json({ message: 'Song updated successfully', song: updatedSong });
-    } catch (err) {
-      console.error('Update error:', err);
-      res.status(500).json({ error: err.message });
+  try {
+    const { id } = req.params; // Get song ID from URL
+    const { title, artist, duration } = req.body; // Extract updated metadata
+    if (!title || !artist) {
+      return res.status(400).json({ error: 'Title and artist are required' }); // Validate required fields
     }
-  });
+    const updatedSong = await Song.findByIdAndUpdate(
+      id,
+      { title, artist, duration },
+      { new: true, runValidators: true } // Return updated document, run schema validators
+    );
+    if (!updatedSong) {
+      return res.status(404).json({ error: 'Song not found' }); // Handle song not found
+    }
+    res.status(200).json({ message: 'Song updated successfully', song: updatedSong }); // Return success response
+  } catch (err) {
+    console.error('Update error:', err); // Log error
+    res.status(500).json({ error: err.message }); // Handle errors
+  }
+});
 
+// Route to delete a song by ID
 app.delete('/songs/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedSong = await Song.findByIdAndDelete(id);
+    const { id } = req.params; // Get song ID from URL
+    const deletedSong = await Song.findByIdAndDelete(id); // Delete song from database
     if (!deletedSong) {
-      return res.status(404).json({ error: 'Song not found' });
+      return res.status(404).json({ error: 'Song not found' }); // Handle song not found
     }
-    const filePath = path.join(songsDir, path.basename(deletedSong.url));
+    const filePath = path.join(songsDir, path.basename(deletedSong.url)); // Get file path
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(filePath); // Delete song file from disk
     }
-    res.status(200).json({ message: 'Song deleted successfully', song: deletedSong });
+    res.status(200).json({ message: 'Song deleted successfully', song: deletedSong }); // Return success response
   } catch (err) {
-    console.error('Delete error:', err); // Server-side log
-    res.status(500).json({ error: err.message });
+    console.error('Delete error:', err); // Log error
+    res.status(500).json({ error: err.message }); // Handle errors
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`); // Log server start
 });
