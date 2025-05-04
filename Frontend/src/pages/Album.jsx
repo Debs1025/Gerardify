@@ -11,14 +11,14 @@ function Album({ setCurrentSong, currentSong, setIsPlaying, playlists, setPlayli
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);    // Controls delete confirm
+  const [showDeleteModal, setShowDeleteModal] = useState(false);   // Controls delete confirm
   const [isEditing, setIsEditing] = useState(false);               // Controls edit mode
   const [editedName, setEditedName] = useState('');                // Stores edited album name
-  const [editedArtist, setEditedArtist] = useState('');           //  State for edited artist
+  const [editedArtist, setEditedArtist] = useState('');            //  State for edited artist
   const [currentAlbum, setCurrentAlbum] = useState(null);          // Stores current album data
   const [availableSongs, setAvailableSongs] = useState([]);        // Stores songs that can be added
-  const [showAddSongs, setShowAddSongs] = useState(false);        //  Controls add songs modal
-  const [currentIndex, setCurrentIndex] = useState(0);            //  Track current song index
+  const [showAddSongs, setShowAddSongs] = useState(false);         //  Controls add songs modal
+  const [currentIndex, setCurrentIndex] = useState(0);             //  Handles current song playing in album
   
   // Set the current album based on the ID 
   useEffect(() => {

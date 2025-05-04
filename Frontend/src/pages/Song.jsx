@@ -5,7 +5,8 @@ import '../styles/pages/Song.css';
 function Song({ setCurrentSong, setIsPlaying, songs, setSongs, setPlaylists }) {
   const location = useLocation(); // For getting the song passed from the library
   const navigate = useNavigate(); // For navigation when clicking buttons
-  const song = location.state?.song; // Retrieve the selected song from location state
+  const song = location.state?.song; // Retrieve the song from the location defined or undefined
+
   const [isEditing, setIsEditing] = useState(false); // For toggling edit mode
   const [editedSong, setEditedSong] = useState(song || {}); // Holds the song details for editing
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // For showing delete confirmation 
